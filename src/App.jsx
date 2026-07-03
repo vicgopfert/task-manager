@@ -1,11 +1,11 @@
-import Tasks from "./Tasks";
+import Tasks from './Tasks'
 
 function App() {
   return (
     <div className="App">
       <Tasks />
     </div>
-  );
+  )
 }
 
-export default App;
+export default App

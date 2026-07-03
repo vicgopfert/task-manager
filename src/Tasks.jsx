@@ -1,12 +1,12 @@
-import { useState } from "react";
-import Header from "./Header";
+import { useState } from 'react'
+import Header from './Header'
 
 function Tasks() {
-  const [inputValue, setInputValue] = useState("teste");
-  const [messagens, setMessagens] = useState(["Play games", "Watch doramas"]);
+  const [inputValue, setInputValue] = useState('teste')
+  const [messagens, setMessagens] = useState(['Play games', 'Watch doramas'])
 
   function handleButtonClick() {
-    setMessagens([...messagens, inputValue]);
+    setMessagens([...messagens, inputValue])
   }
 
   return (
@@ -39,7 +39,7 @@ function Tasks() {
         </ul>
       </div>
     </div>
-  );
+  )
 }
 
-export default Tasks;
+export default Tasks
