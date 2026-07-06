@@ -1,6 +1,8 @@
 import CheckIcon from "../assets/icons/check.svg?react"
 import LoaderIcon from "../assets/icons/loader.svg?react"
 import DetailsIcon from "../assets/icons/details.svg?react"
+import TrashIcon from "../assets/icons/trash.svg?react"
+import Button from "./Button"
 
 const STATUS_CONFIG = {
   done: {
@@ -22,7 +24,7 @@ const STATUS_CONFIG = {
   },
 }
 
-const TaskItem = ({ task, handleTaskCheckboxClick }) => {
+const TaskItem = ({ task, handleCheckboxClick, handleDeleteClick }) => {
   const status = STATUS_CONFIG[task.status]
 
   return (
@@ -36,7 +38,7 @@ const TaskItem = ({ task, handleTaskCheckboxClick }) => {
           <input
             type="checkbox"
             checked={task.status === "done"}
-            onChange={() => handleTaskCheckboxClick(task)}
+            onChange={() => handleCheckboxClick(task)}
             className="absolute h-full w-full cursor-pointer opacity-0"
           />
           {status.icon}
@@ -45,9 +47,15 @@ const TaskItem = ({ task, handleTaskCheckboxClick }) => {
         {task.title}
       </div>
 
-      <a href="#" className="transition hover:opacity-75">
-        <DetailsIcon />
-      </a>
+      <div className="flex items-center gap-1">
+        <Button variant="ghost" onClick={() => handleDeleteClick(task)}>
+          <TrashIcon className="text-red-400" />
+        </Button>
+
+        <a href="#" className="py-1 transition hover:opacity-75">
+          <DetailsIcon />
+        </a>
+      </div>
     </div>
   )
 }
