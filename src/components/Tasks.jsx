@@ -1,3 +1,5 @@
+import { toast } from "sonner"
+import { useState } from "react"
 import Button from "./Button"
 import TrashIcon from "../assets/icons/trash.svg?react"
 import AddIcon from "../assets/icons/add.svg?react"
@@ -5,7 +7,6 @@ import SunIcon from "../assets/icons/sun.svg?react"
 import CloudSunIcon from "../assets/icons/cloud-sun.svg?react"
 import MoonIcon from "../assets/icons/moon.svg?react"
 import TasksSeparator from "./TasksSeparator"
-import { useState } from "react"
 import TASKS from "../constants/tasks"
 import TaskItem from "./TaskItem"
 
@@ -21,16 +22,28 @@ const Tasks = () => {
     done: "not_started",
   }
 
+  const STATUS_TOAST = {
+    in_progress: { message: "Tarefa em andamento", type: "info" },
+    done: { message: "Tarefa concluída", type: "success" },
+    not_started: { message: "Tarefa reiniciada", type: "warning" },
+  }
+
   const handleTaskCheckboxClick = (task) => {
+    const newStatus = STATUS_CYCLE[task.status]
+
     const newTasks = tasks.map((t) =>
-      t.id === task.id ? { ...t, status: STATUS_CYCLE[t.status] } : t
+      t.id === task.id ? { ...t, status: newStatus } : t
     )
     setTasks(newTasks)
+
+    const { message, type } = STATUS_TOAST[newStatus]
+    toast[type](message)
   }
 
   const handleTaskDeleteClick = (task) => {
     const newTasks = tasks.filter((t) => t.id !== task.id)
     setTasks(newTasks)
+    toast.success("Tarefa deletada com sucesso!")
   }
 
   return (
