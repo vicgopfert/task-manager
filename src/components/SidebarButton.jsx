@@ -1,4 +1,4 @@
-function SidebarButton({ children, variant }) {
+const SidebarButton = ({ children, variant }) => {
   const getVariantClasses = () => {
     if (variant === "unselected") {
       return "text-[#35383E]"

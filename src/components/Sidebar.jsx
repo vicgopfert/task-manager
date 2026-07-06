@@ -2,7 +2,7 @@ import SidebarButton from "./SidebarButton"
 import HomeIcon from "../assets/icons/home.svg?react"
 import TasksIcon from "../assets/icons/tasks.svg?react"
 
-function Sidebar() {
+const Sidebar = () => {
   return (
     <div className="h-screen w-64 bg-white">
       <div className="space-y-4 px-8 py-6">
