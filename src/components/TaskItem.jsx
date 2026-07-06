@@ -22,12 +22,12 @@ const STATUS_CONFIG = {
   },
 }
 
-const TaskItem = ({ task, onToggle }) => {
+const TaskItem = ({ task, handleTaskCheckboxClick }) => {
   const status = STATUS_CONFIG[task.status]
 
   return (
     <div
-      className={`flex items-center justify-between gap-2 rounded-lg bg-current/10 px-4 py-3 text-sm ${status.color}`}
+      className={`flex items-center justify-between gap-2 rounded-lg bg-current/10 px-4 py-3 text-sm transition ${status.color}`}
     >
       <div className="flex items-center gap-2">
         <label
@@ -36,7 +36,7 @@ const TaskItem = ({ task, onToggle }) => {
           <input
             type="checkbox"
             checked={task.status === "done"}
-            onChange={() => onToggle?.(task.id)}
+            onChange={() => handleTaskCheckboxClick(task)}
             className="absolute h-full w-full cursor-pointer opacity-0"
           />
           {status.icon}

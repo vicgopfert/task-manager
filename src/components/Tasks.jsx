@@ -10,10 +10,23 @@ import TASKS from "../constants/tasks"
 import TaskItem from "./TaskItem"
 
 const Tasks = () => {
-  const [tasks] = useState(TASKS)
+  const [tasks, setTasks] = useState(TASKS)
   const morningTasks = tasks.filter((task) => task.time === "morning")
   const afternoonTasks = tasks.filter((task) => task.time === "afternoon")
   const nightTasks = tasks.filter((task) => task.time === "evening")
+
+  const STATUS_CYCLE = {
+    not_started: "in_progress",
+    in_progress: "done",
+    done: "not_started",
+  }
+
+  const handleTaskCheckboxClick = (task) => {
+    const newTasks = tasks.map((t) =>
+      t.id === task.id ? { ...t, status: STATUS_CYCLE[t.status] } : t
+    )
+    setTasks(newTasks)
+  }
 
   return (
     <div className="w-full px-8 py-16">
@@ -22,6 +35,7 @@ const Tasks = () => {
           <span className="text-xs font-semibold text-[#00ADB5]">
             Minhas Tarefas
           </span>
+
           <h2 className="text-xl font-semibold">Minhas Tarefas</h2>
         </div>
 
@@ -30,6 +44,7 @@ const Tasks = () => {
             Limpar Tarefa
             <TrashIcon />
           </Button>
+
           <Button>
             Nova Tarefa
             <AddIcon />
@@ -41,21 +56,33 @@ const Tasks = () => {
         <div className="space-y-3">
           <TasksSeparator title="Manhã" icon={<SunIcon />} />
           {morningTasks.map((task) => (
-            <TaskItem key={task.id} task={task} />
+            <TaskItem
+              key={task.id}
+              task={task}
+              handleTaskCheckboxClick={handleTaskCheckboxClick}
+            />
           ))}
         </div>
 
         <div className="my-6 space-y-3">
           <TasksSeparator title="Tarde" icon={<CloudSunIcon />} />
           {afternoonTasks.map((task) => (
-            <TaskItem key={task.id} task={task} />
+            <TaskItem
+              key={task.id}
+              task={task}
+              handleTaskCheckboxClick={handleTaskCheckboxClick}
+            />
           ))}
         </div>
 
         <div className="space-y-3">
           <TasksSeparator title="Noite" icon={<MoonIcon />} />
           {nightTasks.map((task) => (
-            <TaskItem key={task.id} task={task} />
+            <TaskItem
+              key={task.id}
+              task={task}
+              handleTaskCheckboxClick={handleTaskCheckboxClick}
+            />
           ))}
         </div>
       </div>
