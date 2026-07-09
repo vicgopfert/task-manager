@@ -10,11 +10,17 @@ import Input from "./Input"
 import TimeSelect from "./TimeSelect"
 
 const AddTaskDialog = ({ isOpen, handleClose, handleSubmit }) => {
-  const [title, setTitle] = useState()
-  const [time, setTime] = useState()
-  const [description, setDescription] = useState()
+  const [title, setTitle] = useState("")
+  const [time, setTime] = useState("")
+  const [description, setDescription] = useState("")
 
   const nodeRef = useRef(null)
+
+  const resetForm = () => {
+    setTitle("")
+    setTime("")
+    setDescription("")
+  }
 
   const handleSaveClick = () => {
     handleSubmit({
@@ -35,6 +41,7 @@ const AddTaskDialog = ({ isOpen, handleClose, handleSubmit }) => {
       timeout={200}
       classNames="add-task-dialog"
       unmountOnExit
+      onExit={resetForm}
     >
       <div
         ref={nodeRef}
