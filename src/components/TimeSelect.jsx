@@ -1,14 +1,19 @@
 import InputLabel from "./InputLabel"
 
-const TimeSelect = () => {
+const TimeSelect = (props) => {
   return (
     <div className="flex flex-col gap-1 text-left">
       <InputLabel htmlFor="time">Horário</InputLabel>
 
       <select
         id="time"
+        defaultValue=""
         className="rounded-lg border border-solid border-[#ECECEC] px-4 py-3 text-sm outline-[#00ADB5] placeholder:text-sm placeholder:text-[#9A9C9F]"
+        {...props}
       >
+        <option value="" disabled>
+          Selecione um horário
+        </option>
         <option value="morning">Manhã</option>
         <option value="afternoon">Tarde</option>
         <option value="evening">Noite</option>
