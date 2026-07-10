@@ -4,5 +4,6 @@
   "semi": false,
   "singleQuote": false,
   "plugins": ["prettier-plugin-tailwindcss"],
+  "tailwindFunctions": ["tv"],
   "tailwindStylesheet": "./src/index.css"
 }
