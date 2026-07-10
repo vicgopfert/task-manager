@@ -1,19 +1,18 @@
-const SidebarButton = ({ children, variant }) => {
-  const getVariantClasses = () => {
-    if (variant === "unselected") {
-      return "text-dark-blue"
-    }
+import { tv } from "tailwind-variants"
 
-    if (variant === "selected") {
-      return "bg-primary/15 text-primary"
-    }
-  }
+const SidebarButton = ({ children, color }) => {
+  const sidebar = tv({
+    base: "flex items-center gap-2 rounded-lg px-6 py-3",
+    variants: {
+      color: {
+        unselected: "text-dark-blue",
+        selected: "bg-primary/15 text-primary",
+      },
+    },
+  })
 
   return (
-    <a
-      href="#"
-      className={`flex items-center gap-2 rounded-lg px-6 py-3 ${getVariantClasses()}`}
-    >
+    <a href="#" className={sidebar({ color })}>
       {children}
     </a>
   )
