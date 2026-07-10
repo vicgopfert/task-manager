@@ -3,20 +3,20 @@ import Button from "./Button"
 
 const STATUS_CONFIG = {
   done: {
-    color: "text-[#00ADB5]",
-    iconBg: "bg-[#00ADB5] text-white",
+    color: "text-primary",
+    iconBg: "bg-primary text-white",
     icon: <CheckIcon className="pointer-events-none relative z-10 h-4 w-4" />,
   },
   in_progress: {
-    color: "text-[#FFAA04]",
-    iconBg: "bg-[#FFAA04] text-white",
+    color: "text-process",
+    iconBg: "bg-process text-white",
     icon: (
       <LoaderIcon className="pointer-events-none relative z-10 h-4 w-4 animate-spin" />
     ),
   },
   not_started: {
-    color: "text-[#35383E]",
-    iconBg: "bg-[#35383E]/10",
+    color: "text-dark-blue",
+    iconBg: "bg-dark-blue/10",
     icon: null,
   },
 }
