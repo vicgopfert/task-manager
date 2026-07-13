@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "prepare": "husky"
+    "prepare": "husky",
+    "server": "json-server --watch db.json --port 3000"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.2",
@@ -38,6 +39,7 @@
     "eslint-plugin-simple-import-sort": "^13.0.0",
     "globals": "^17.7.0",
     "husky": "^9.1.7",
+    "json-server": "^0.17.4",
     "lint-staged": "^16.4.0",
     "prettier": "^3.9.4",
     "prettier-plugin-tailwindcss": "^0.8.0",
