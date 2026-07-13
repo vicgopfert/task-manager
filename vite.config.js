@@ -6,4 +6,9 @@ import svgr from "vite-plugin-svgr"
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), svgr(), tailwindcss()],
+  server: {
+    watch: {
+      ignored: ["**/db.json"],
+    },
+  },
 })
