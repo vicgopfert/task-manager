@@ -63,10 +63,22 @@ const Tasks = () => {
     toast[type](message)
   }
 
-  const handleTaskDeleteClick = (task) => {
-    const newTasks = tasks.filter((t) => t.id !== task.id)
-    setTasks(newTasks)
-    toast.success("Tarefa deletada com sucesso!")
+  const handleTaskDeleteClick = async (task) => {
+    try {
+      const response = await fetch(`http://localhost:3000/tasks/${task.id}`, {
+        method: "DELETE",
+      })
+      if (!response.ok) {
+        throw new Error("Erro ao deletar tarefa")
+      }
+
+      const newTasks = tasks.filter((t) => t.id !== task.id)
+      setTasks(newTasks)
+      toast.success("Tarefa deletada com sucesso!")
+    } catch (error) {
+      console.error(error)
+      toast.error("Erro ao deletar tarefa")
+    }
   }
 
   const handleAddTaskSubmit = async (newTask) => {
@@ -82,7 +94,6 @@ const Tasks = () => {
       }
 
       setTasks([...tasks, newTask])
-      console.log("Chegou até aqui")
       toast.success("Tarefa adicionada com sucesso!")
     } catch (error) {
       console.error(error)
