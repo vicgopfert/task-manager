@@ -25,7 +25,7 @@ const AddTaskDialog = ({ isOpen, handleClose, handleSubmit }) => {
     setErrors([])
   }
 
-  const handleSaveClick = () => {
+  const handleSaveClick = async () => {
     const newErrors = []
 
     const title = titleRef.current.value
@@ -56,7 +56,7 @@ const AddTaskDialog = ({ isOpen, handleClose, handleSubmit }) => {
       return
     }
 
-    handleSubmit({
+    await handleSubmit({
       id: v4(),
       title,
       time,

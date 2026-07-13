@@ -69,9 +69,25 @@ const Tasks = () => {
     toast.success("Tarefa deletada com sucesso!")
   }
 
-  const handleAddTaskSubmit = (newTask) => {
-    setTasks([...tasks, newTask])
-    toast.success("Tarefa adicionada com sucesso!")
+  const handleAddTaskSubmit = async (newTask) => {
+    try {
+      const response = await fetch("http://localhost:3000/tasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newTask),
+      })
+
+      if (!response.ok) {
+        throw new Error("Erro ao adicionar tarefa")
+      }
+
+      setTasks([...tasks, newTask])
+      console.log("Chegou até aqui")
+      toast.success("Tarefa adicionada com sucesso!")
+    } catch (error) {
+      console.error(error)
+      toast.error("Erro ao adicionar tarefa")
+    }
   }
 
   return (
