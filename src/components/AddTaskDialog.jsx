@@ -4,14 +4,17 @@ import PropTypes from "prop-types"
 import { useRef, useState } from "react"
 import { createPortal } from "react-dom"
 import { CSSTransition } from "react-transition-group"
+import { toast } from "sonner"
 import { v4 } from "uuid"
 
+import { LoaderIcon } from "../assets/icons"
 import Button from "./Button"
 import Input from "./Input"
 import TimeSelect from "./TimeSelect"
 
-const AddTaskDialog = ({ isOpen, handleClose, handleSubmit }) => {
+const AddTaskDialog = ({ isOpen, handleClose, onSubmitSuccess }) => {
   const [errors, setErrors] = useState([])
+  const [isLoading, setIsLoading] = useState(false)
 
   const nodeRef = useRef(null)
   const titleRef = useRef()
@@ -25,14 +28,36 @@ const AddTaskDialog = ({ isOpen, handleClose, handleSubmit }) => {
     setErrors([])
   }
 
+  const addTask = async (newTask) => {
+    setIsLoading(true)
+    try {
+      const response = await fetch("http://localhost:3000/tasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newTask),
+      })
+      if (!response.ok) {
+        throw new Error("Erro ao adicionar tarefa")
+      }
+      onSubmitSuccess(newTask)
+      return true
+    } catch (error) {
+      console.error(error)
+      toast.error("Erro ao adicionar tarefa")
+      return false
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const handleSaveClick = async () => {
     const newErrors = []
 
-    const title = titleRef.current.value
+    const title = titleRef.current.value.trim()
     const time = timeRef.current.value
-    const description = descriptionRef.current.value
+    const description = descriptionRef.current.value.trim()
 
-    if (!title.trim()) {
+    if (!title) {
       newErrors.push({
         inputName: "title",
         message: "O título é obrigatório.",
@@ -44,7 +69,7 @@ const AddTaskDialog = ({ isOpen, handleClose, handleSubmit }) => {
         message: "O horário é obrigatório.",
       })
     }
-    if (!description.trim()) {
+    if (!description) {
       newErrors.push({
         inputName: "description",
         message: "A descrição é obrigatória.",
@@ -56,7 +81,7 @@ const AddTaskDialog = ({ isOpen, handleClose, handleSubmit }) => {
       return
     }
 
-    await handleSubmit({
+    const success = await addTask({
       id: v4(),
       title,
       time,
@@ -64,7 +89,9 @@ const AddTaskDialog = ({ isOpen, handleClose, handleSubmit }) => {
       status: "not_started",
     })
 
-    handleClose()
+    if (success) {
+      handleClose()
+    }
   }
 
   const titleError = errors.find((error) => error.inputName === "title")
@@ -100,6 +127,7 @@ const AddTaskDialog = ({ isOpen, handleClose, handleSubmit }) => {
               placeholder="Título da tarefa"
               errorMessage={titleError?.message}
               ref={titleRef}
+              disabled={isLoading}
             />
 
             <TimeSelect
@@ -107,6 +135,7 @@ const AddTaskDialog = ({ isOpen, handleClose, handleSubmit }) => {
               label="Horário"
               errorMessage={timeError?.message}
               ref={timeRef}
+              disabled={isLoading}
             />
 
             <Input
@@ -115,6 +144,7 @@ const AddTaskDialog = ({ isOpen, handleClose, handleSubmit }) => {
               placeholder="Descreva a tarefa"
               errorMessage={descriptionError?.message}
               ref={descriptionRef}
+              disabled={isLoading}
             />
 
             <div className="flex gap-3">
@@ -123,12 +153,22 @@ const AddTaskDialog = ({ isOpen, handleClose, handleSubmit }) => {
                 size="large"
                 className="w-full"
                 onClick={handleClose}
+                disabled={isLoading}
               >
                 Cancelar
               </Button>
 
-              <Button size="large" className="w-full" onClick={handleSaveClick}>
-                Salvar
+              <Button
+                size="large"
+                className="w-full"
+                onClick={handleSaveClick}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <LoaderIcon className="h-4 w-4 animate-spin" />
+                ) : (
+                  "Salvar"
+                )}
               </Button>
             </div>
           </div>
@@ -142,7 +182,7 @@ const AddTaskDialog = ({ isOpen, handleClose, handleSubmit }) => {
 AddTaskDialog.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   handleClose: PropTypes.func.isRequired,
-  handleSubmit: PropTypes.func.isRequired,
+  onSubmitSuccess: PropTypes.func.isRequired,
 }
 
 export default AddTaskDialog

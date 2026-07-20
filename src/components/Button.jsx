@@ -3,7 +3,7 @@ import { tv } from "tailwind-variants"
 
 const Button = ({ children, color, size, className, ...rest }) => {
   const button = tv({
-    base: "flex items-center justify-center gap-1 rounded-md px-3 font-semibold transition hover:opacity-75",
+    base: `flex items-center justify-center gap-1 rounded-md px-3 font-semibold transition hover:opacity-75 ${rest.disabled && "cursor-not-allowed opacity-50"}`,
     variants: {
       color: {
         primary: "bg-primary text-white",

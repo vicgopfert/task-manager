@@ -44,6 +44,7 @@ const TaskItem = ({ task, handleCheckboxClick, onDeleteSuccess }) => {
     } catch (error) {
       console.error(error)
       toast.error("Erro ao deletar tarefa")
+      setDeleteIsLoading(false)
     }
   }
 
