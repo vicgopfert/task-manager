@@ -10,7 +10,7 @@ const TimeSelect = ({ label, errorMessage, ref, ...rest }) => {
 
       <select
         defaultValue=""
-        className="rounded-lg border border-solid border-border px-4 py-3 text-sm outline-primary placeholder:text-sm placeholder:text-text-gray"
+        className="rounded-lg border border-solid border-border px-4 py-3 outline-primary placeholder:text-sm placeholder:text-text-gray"
         ref={ref}
         {...rest}
       >
