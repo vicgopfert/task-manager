@@ -1,4 +1,6 @@
 import PropTypes from "prop-types"
+import { useState } from "react"
+import { toast } from "sonner"
 
 import { CheckIcon, DetailsIcon, LoaderIcon, TrashIcon } from "../assets/icons"
 import Button from "./Button"
@@ -23,8 +25,27 @@ const STATUS_CONFIG = {
   },
 }
 
-const TaskItem = ({ task, handleCheckboxClick, handleDeleteClick }) => {
+const TaskItem = ({ task, handleCheckboxClick, onDeleteSuccess }) => {
   const status = STATUS_CONFIG[task.status]
+
+  const [deleteIsLoading, setDeleteIsLoading] = useState(false)
+
+  const handleDeleteClick = async () => {
+    setDeleteIsLoading(true)
+    try {
+      const response = await fetch(`http://localhost:3000/tasks/${task.id}`, {
+        method: "DELETE",
+      })
+      if (!response.ok) {
+        throw new Error("Erro ao deletar tarefa")
+      }
+      onDeleteSuccess(task)
+      setDeleteIsLoading(false)
+    } catch (error) {
+      console.error(error)
+      toast.error("Erro ao deletar tarefa")
+    }
+  }
 
   return (
     <div
@@ -47,10 +68,17 @@ const TaskItem = ({ task, handleCheckboxClick, handleDeleteClick }) => {
       </div>
 
       <div className="flex items-center gap-1">
-        <Button color="ghost" onClick={() => handleDeleteClick(task)}>
-          <TrashIcon className="text-red-400" />
+        <Button
+          color="ghost"
+          onClick={handleDeleteClick}
+          disabled={deleteIsLoading}
+        >
+          {deleteIsLoading ? (
+            <LoaderIcon className="h-4 w-4 animate-spin" />
+          ) : (
+            <TrashIcon className="text-red-400" />
+          )}
         </Button>
-
         <a href="#" className="py-1 transition hover:opacity-75">
           <DetailsIcon />
         </a>
@@ -68,7 +96,7 @@ TaskItem.propTypes = {
     status: PropTypes.oneOf(["done", "in_progress", "not_started"]).isRequired,
   }).isRequired,
   handleCheckboxClick: PropTypes.func.isRequired,
-  handleDeleteClick: PropTypes.func.isRequired,
+  onDeleteSuccess: PropTypes.func.isRequired,
 }
 
 export default TaskItem
