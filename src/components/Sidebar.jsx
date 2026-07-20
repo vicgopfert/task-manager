@@ -17,7 +17,7 @@ const Sidebar = () => {
           <HomeIcon />
           Início
         </SidebarButton>
-        <SidebarButton color="selected">
+        <SidebarButton to="/">
           <TasksIcon />
           Minhas Tarefas
         </SidebarButton>

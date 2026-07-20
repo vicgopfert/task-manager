@@ -1,7 +1,9 @@
+import { Route, Routes } from "react-router-dom"
 import { Toaster } from "sonner"
 
 import Sidebar from "./components/Sidebar"
 import Tasks from "./components/Tasks"
+import TaskDetailsPage from "./pages/task-details"
 
 function App() {
   return (
@@ -16,7 +18,10 @@ function App() {
         }}
       />
       <Sidebar />
-      <Tasks />
+      <Routes>
+        <Route path="/" element={<Tasks />} />
+        <Route path="/task/:taskId" element={<TaskDetailsPage />} />
+      </Routes>
     </div>
   )
 }
