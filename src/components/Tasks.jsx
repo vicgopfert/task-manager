@@ -106,38 +106,56 @@ const Tasks = () => {
       <div className="rounded-xl bg-white p-6">
         <div className="space-y-3">
           <TasksSeparator title="Manhã" icon={<SunIcon />} />
-          {morningTasks.map((task) => (
-            <TaskItem
-              key={task.id}
-              task={task}
-              handleCheckboxClick={handleTaskCheckboxClick}
-              onDeleteSuccess={onDeleteTaskSuccess}
-            />
-          ))}
+          {morningTasks.length === 0 ? (
+            <p className="text-sm text-text-gray">
+              Nenhuma tarefa para a manhã.
+            </p>
+          ) : (
+            morningTasks.map((task) => (
+              <TaskItem
+                key={task.id}
+                task={task}
+                handleCheckboxClick={handleTaskCheckboxClick}
+                onDeleteSuccess={onDeleteTaskSuccess}
+              />
+            ))
+          )}
         </div>
 
         <div className="my-6 space-y-3">
           <TasksSeparator title="Tarde" icon={<CloudSunIcon />} />
-          {afternoonTasks.map((task) => (
-            <TaskItem
-              key={task.id}
-              task={task}
-              handleCheckboxClick={handleTaskCheckboxClick}
-              onDeleteSuccess={onDeleteTaskSuccess}
-            />
-          ))}
+          {afternoonTasks.length === 0 ? (
+            <p className="text-sm text-text-gray">
+              Nenhuma tarefa para a tarde.
+            </p>
+          ) : (
+            afternoonTasks.map((task) => (
+              <TaskItem
+                key={task.id}
+                task={task}
+                handleCheckboxClick={handleTaskCheckboxClick}
+                onDeleteSuccess={onDeleteTaskSuccess}
+              />
+            ))
+          )}
         </div>
 
         <div className="space-y-3">
           <TasksSeparator title="Noite" icon={<MoonIcon />} />
-          {nightTasks.map((task) => (
-            <TaskItem
-              key={task.id}
-              task={task}
-              handleCheckboxClick={handleTaskCheckboxClick}
-              onDeleteSuccess={onDeleteTaskSuccess}
-            />
-          ))}
+          {nightTasks.length === 0 ? (
+            <p className="text-sm text-text-gray">
+              Nenhuma tarefa para a noite.
+            </p>
+          ) : (
+            nightTasks.map((task) => (
+              <TaskItem
+                key={task.id}
+                task={task}
+                handleCheckboxClick={handleTaskCheckboxClick}
+                onDeleteSuccess={onDeleteTaskSuccess}
+              />
+            ))
+          )}
         </div>
       </div>
     </div>
