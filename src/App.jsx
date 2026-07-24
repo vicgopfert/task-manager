@@ -2,8 +2,8 @@ import { Route, Routes } from "react-router-dom"
 import { Toaster } from "sonner"
 
 import Sidebar from "./components/Sidebar"
-import Tasks from "./components/Tasks"
-import TaskDetailsPage from "./pages/task-details"
+import TaskDetailsPage from "./pages/TaskDetails"
+import Tasks from "./pages/Tasks"
 
 function App() {
   return (
