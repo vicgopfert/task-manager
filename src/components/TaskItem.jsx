@@ -1,5 +1,5 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import PropTypes from "prop-types"
-import { useState } from "react"
 import { Link } from "react-router-dom"
 import { toast } from "sonner"
 
@@ -26,27 +26,92 @@ const STATUS_CONFIG = {
   },
 }
 
-const TaskItem = ({ task, handleCheckboxClick, onDeleteSuccess }) => {
-  const status = STATUS_CONFIG[task.status]
+const STATUS_CYCLE = {
+  not_started: "in_progress",
+  in_progress: "done",
+  done: "not_started",
+}
 
-  const [deleteIsLoading, setDeleteIsLoading] = useState(false)
+const STATUS_TOAST = {
+  in_progress: { message: "Tarefa em andamento", type: "info" },
+  done: { message: "Tarefa concluída", type: "success" },
+  not_started: { message: "Tarefa reiniciada", type: "warning" },
+}
 
-  const handleDeleteClick = async () => {
-    setDeleteIsLoading(true)
-    try {
-      const response = await fetch(`http://localhost:3000/tasks/${task.id}`, {
-        method: "DELETE",
-      })
-      if (!response.ok) {
-        throw new Error("Erro ao deletar tarefa")
-      }
-      onDeleteSuccess(task)
-      setDeleteIsLoading(false)
-    } catch (error) {
-      console.error(error)
-      toast.error("Erro ao deletar tarefa")
-      setDeleteIsLoading(false)
+const TaskItem = ({ task }) => {
+  const queryClient = useQueryClient()
+
+  const updateTasksCache = (updater) => {
+    queryClient.setQueryData(["tasks"], (currentTasks) =>
+      currentTasks ? updater(currentTasks) : currentTasks
+    )
+  }
+
+  const deleteTask = async () => {
+    const response = await fetch(`http://localhost:3000/tasks/${task.id}`, {
+      method: "DELETE",
+    })
+    if (!response.ok) {
+      throw new Error("Erro ao deletar tarefa")
     }
+    return response.json()
+  }
+  const { mutate: deleteTaskMutate, isPending: isDeleting } = useMutation({
+    mutationKey: ["deleteTask", task.id],
+    mutationFn: deleteTask,
+  })
+
+  const updateStatus = async (newStatus) => {
+    const response = await fetch(`http://localhost:3000/tasks/${task.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: newStatus }),
+    })
+    if (!response.ok) {
+      throw new Error("Erro ao atualizar tarefa")
+    }
+    return response.json()
+  }
+  const { mutate: updateStatusMutate, isPending: isStatusUpdating } =
+    useMutation({
+      mutationKey: ["updateTaskStatus", task.id],
+      mutationFn: updateStatus,
+    })
+
+  const status = STATUS_CONFIG[task.status] ?? STATUS_CONFIG.not_started
+
+  const handleDeleteClick = () => {
+    deleteTaskMutate(undefined, {
+      onSuccess: () => {
+        updateTasksCache((currentTasks) =>
+          currentTasks.filter((t) => t.id !== task.id)
+        )
+        toast.success("Tarefa deletada com sucesso!")
+      },
+      onError: (error) => {
+        console.error("Erro ao deletar tarefa", error)
+        toast.error("Erro ao deletar tarefa")
+      },
+    })
+  }
+
+  const handleCheckboxClick = () => {
+    const newStatus = STATUS_CYCLE[task.status] ?? STATUS_CYCLE.not_started
+    updateStatusMutate(newStatus, {
+      onSuccess: (updatedTask) => {
+        updateTasksCache((currentTasks) =>
+          currentTasks.map((t) =>
+            t.id === updatedTask.id ? { ...t, status: updatedTask.status } : t
+          )
+        )
+        const { message, type } = STATUS_TOAST[updatedTask.status]
+        toast[type](message)
+      },
+      onError: (error) => {
+        console.error("Erro ao atualizar tarefa", error)
+        toast.error("Erro ao atualizar tarefa")
+      },
+    })
   }
 
   return (
@@ -60,7 +125,8 @@ const TaskItem = ({ task, handleCheckboxClick, onDeleteSuccess }) => {
           <input
             type="checkbox"
             checked={task.status === "done"}
-            onChange={() => handleCheckboxClick(task)}
+            onChange={handleCheckboxClick}
+            disabled={isStatusUpdating}
             className="absolute h-full w-full cursor-pointer opacity-0"
           />
           {status.icon}
@@ -70,12 +136,8 @@ const TaskItem = ({ task, handleCheckboxClick, onDeleteSuccess }) => {
       </div>
 
       <div className="flex items-center gap-1">
-        <Button
-          color="ghost"
-          onClick={handleDeleteClick}
-          disabled={deleteIsLoading}
-        >
-          {deleteIsLoading ? (
+        <Button color="ghost" onClick={handleDeleteClick} disabled={isDeleting}>
+          {isDeleting ? (
             <LoaderIcon className="h-4 w-4 animate-spin" />
           ) : (
             <TrashIcon className="text-red-400" />
@@ -91,14 +153,12 @@ const TaskItem = ({ task, handleCheckboxClick, onDeleteSuccess }) => {
 
 TaskItem.propTypes = {
   task: PropTypes.shape({
-    id: PropTypes.string.isRequired,
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
     title: PropTypes.string.isRequired,
     description: PropTypes.string.isRequired,
     time: PropTypes.oneOf(["morning", "afternoon", "evening"]).isRequired,
     status: PropTypes.oneOf(["done", "in_progress", "not_started"]).isRequired,
   }).isRequired,
-  handleCheckboxClick: PropTypes.func.isRequired,
-  onDeleteSuccess: PropTypes.func.isRequired,
 }
 
 export default TaskItem

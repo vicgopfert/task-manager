@@ -1,5 +1,6 @@
 import "./AddTaskDialog.css"
 
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import PropTypes from "prop-types"
 import { useRef } from "react"
 import { createPortal } from "react-dom"
@@ -13,11 +14,38 @@ import Button from "./Button"
 import Input from "./Input"
 import TimeSelect from "./TimeSelect"
 
-const AddTaskDialog = ({ isOpen, handleClose, onSubmitSuccess }) => {
+const AddTaskDialog = ({ isOpen, handleClose }) => {
+  const queryClient = useQueryClient()
+
+  const updateTasksCache = (updater) => {
+    queryClient.setQueryData(["tasks"], (currentTasks) =>
+      currentTasks ? updater(currentTasks) : currentTasks
+    )
+  }
+
+  const addTask = async (newTask) => {
+    const response = await fetch("http://localhost:3000/tasks", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newTask),
+    })
+    if (!response.ok) {
+      throw new Error("Erro ao adicionar tarefa")
+    }
+    return response.json()
+  }
+
+  const { mutate: addTaskMutate, isPending: isCreating } = useMutation({
+    mutationKey: ["addTask"],
+    mutationFn: addTask,
+  })
+
   const nodeRef = useRef(null)
   const {
     register,
-    formState: { errors, isSubmitting },
+    formState: { errors },
     handleSubmit,
     reset,
   } = useForm({
@@ -28,42 +56,31 @@ const AddTaskDialog = ({ isOpen, handleClose, onSubmitSuccess }) => {
     },
   })
 
-  const addTask = async (newTask) => {
-    try {
-      const response = await fetch("http://localhost:3000/tasks", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newTask),
-      })
-      if (!response.ok) {
-        throw new Error("Erro ao adicionar tarefa")
-      }
-      onSubmitSuccess(newTask)
-      return true
-    } catch (error) {
-      console.error(error)
-      toast.error("Erro ao adicionar tarefa")
-      return false
-    }
-  }
-
-  const handleSaveClick = async (data) => {
+  const handleSaveClick = (data) => {
     const title = data.title.trim()
     const time = data.time.trim()
     const description = data.description.trim()
 
-    const success = await addTask({
+    const task = {
       id: v4(),
       title,
       time,
       description,
       status: "not_started",
-    })
-
-    if (success) {
-      handleClose()
-      reset()
     }
+
+    addTaskMutate(task, {
+      onSuccess: () => {
+        updateTasksCache((currentTasks) => [...currentTasks, task])
+        toast.success("Tarefa adicionada com sucesso!")
+        handleClose()
+        reset()
+      },
+      onError: (error) => {
+        console.error("Erro ao adicionar tarefa", error)
+        toast.error("Erro ao adicionar tarefa")
+      },
+    })
   }
 
   return createPortal(
@@ -100,7 +117,7 @@ const AddTaskDialog = ({ isOpen, handleClose, onSubmitSuccess }) => {
                   value.trim() !== "" || "O título não pode estar vazio",
               })}
               errorMessage={errors?.title?.message}
-              disabled={isSubmitting}
+              disabled={isCreating}
             />
 
             <TimeSelect
@@ -112,7 +129,7 @@ const AddTaskDialog = ({ isOpen, handleClose, onSubmitSuccess }) => {
                 validate: (value) =>
                   value.trim() !== "" || "O horário não pode estar vazio",
               })}
-              disabled={isSubmitting}
+              disabled={isCreating}
             />
 
             <Input
@@ -125,7 +142,7 @@ const AddTaskDialog = ({ isOpen, handleClose, onSubmitSuccess }) => {
                 validate: (value) =>
                   value.trim() !== "" || "A descrição não pode estar vazio",
               })}
-              disabled={isSubmitting}
+              disabled={isCreating}
             />
 
             <div className="flex gap-3">
@@ -135,7 +152,7 @@ const AddTaskDialog = ({ isOpen, handleClose, onSubmitSuccess }) => {
                 className="w-full"
                 type="button"
                 onClick={handleClose}
-                disabled={isSubmitting}
+                disabled={isCreating}
               >
                 Cancelar
               </Button>
@@ -144,9 +161,9 @@ const AddTaskDialog = ({ isOpen, handleClose, onSubmitSuccess }) => {
                 size="large"
                 className="w-full"
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isCreating}
               >
-                {isSubmitting ? (
+                {isCreating ? (
                   <LoaderIcon className="h-4 w-4 animate-spin" />
                 ) : (
                   "Salvar"
@@ -164,7 +181,6 @@ const AddTaskDialog = ({ isOpen, handleClose, onSubmitSuccess }) => {
 AddTaskDialog.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   handleClose: PropTypes.func.isRequired,
-  onSubmitSuccess: PropTypes.func.isRequired,
 }
 
 export default AddTaskDialog

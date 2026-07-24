@@ -3,7 +3,7 @@ import { Toaster } from "sonner"
 
 import Sidebar from "./components/Sidebar"
 import TaskDetailsPage from "./pages/TaskDetails"
-import Tasks from "./pages/Tasks"
+import TasksPage from "./pages/Tasks"
 
 function App() {
   return (
@@ -19,7 +19,7 @@ function App() {
       />
       <Sidebar />
       <Routes>
-        <Route path="/" element={<Tasks />} />
+        <Route path="/" element={<TasksPage />} />
         <Route path="/task/:taskId" element={<TaskDetailsPage />} />
       </Routes>
     </div>

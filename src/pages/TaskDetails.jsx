@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
 import { Link, useNavigate, useParams } from "react-router-dom"
 import { toast } from "sonner"
@@ -15,62 +15,77 @@ import TimeSelect from "../components/TimeSelect"
 
 const TaskDetailsPage = () => {
   const { taskId } = useParams()
-  const [task, setTask] = useState()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
+
+  const updateTasksCache = (updater) => {
+    queryClient.setQueryData(["tasks"], (currentTasks) =>
+      currentTasks ? updater(currentTasks) : currentTasks
+    )
+  }
+
+  const fetchTask = async () => {
+    const response = await fetch(`http://localhost:3000/tasks/${taskId}`)
+    if (!response.ok) {
+      throw new Error("Erro ao buscar tarefa")
+    }
+    return response.json()
+  }
+  const { data: task } = useQuery({
+    queryKey: ["task", taskId],
+    queryFn: fetchTask,
+  })
+
+  const editTask = async (updatedTask) => {
+    const response = await fetch(`http://localhost:3000/tasks/${taskId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updatedTask),
+    })
+    if (!response.ok) {
+      throw new Error("Erro ao atualizar tarefa")
+    }
+    return response.json()
+  }
+  const { mutate: editTaskMutate, isPending: isEditing } = useMutation({
+    mutationKey: ["editTask", taskId],
+    mutationFn: editTask,
+  })
+
+  const deleteTask = async () => {
+    const response = await fetch(`http://localhost:3000/tasks/${taskId}`, {
+      method: "DELETE",
+    })
+    if (!response.ok) {
+      throw new Error("Erro ao deletar tarefa")
+    }
+    return response.json()
+  }
+  const { mutate: deleteTaskMutate, isPending: isDeleting } = useMutation({
+    mutationKey: ["deleteTask", taskId],
+    mutationFn: deleteTask,
+  })
+
   const {
     register,
-    formState: { errors, isSubmitting },
+    formState: { errors },
     handleSubmit,
-    reset,
   } = useForm({
     defaultValues: {
-      title: task?.title || "",
-      time: task?.time || "",
-      description: task?.description || "",
+      title: "",
+      time: "",
+      description: "",
+    },
+    values: task && {
+      title: task.title,
+      time: task.time,
+      description: task.description,
     },
   })
 
-  useEffect(() => {
-    const fetchTask = async () => {
-      try {
-        const response = await fetch(`http://localhost:3000/tasks/${taskId}`)
-        if (!response.ok) {
-          throw new Error("Erro ao buscar detalhes da tarefa")
-        }
-        const data = await response.json()
-        setTask(data)
-        reset(data)
-      } catch (error) {
-        console.error(error)
-        toast.error("Erro ao buscar detalhes da tarefa")
-      }
-    }
-
-    fetchTask()
-  }, [taskId, reset])
-
-  const editTask = async (editedTask) => {
-    try {
-      const response = await fetch(`http://localhost:3000/tasks/${task.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editedTask),
-      })
-      if (!response.ok) {
-        throw new Error("Erro ao atualizar tarefa")
-      }
-      const data = await response.json()
-      setTask(data)
-      toast.success("Tarefa atualizada com sucesso")
-      return true
-    } catch (error) {
-      console.error(error)
-      toast.error("Erro ao atualizar tarefa")
-      return false
-    }
-  }
-
-  const handleSaveClick = async (data) => {
+  const handleSaveClick = (data) => {
     const title = data.title.trim()
     const time = data.time
     const description = data.description.trim()
@@ -81,26 +96,37 @@ const TaskDetailsPage = () => {
       description,
     }
 
-    const isEdited = await editTask(editedTask)
-    if (isEdited) {
-      navigate("/")
-    }
+    editTaskMutate(editedTask, {
+      onSuccess: (updatedTask) => {
+        updateTasksCache((currentTasks) =>
+          currentTasks.map((t) =>
+            t.id === updatedTask.id ? { ...t, ...updatedTask } : t
+          )
+        )
+        navigate("/")
+        toast.success("Tarefa atualizada com sucesso!")
+      },
+      onError: (error) => {
+        console.error("Erro ao atualizar tarefa", error)
+        toast.error("Erro ao atualizar tarefa")
+      },
+    })
   }
 
-  const handleDeleteClick = async () => {
-    try {
-      const response = await fetch(`http://localhost:3000/tasks/${task.id}`, {
-        method: "DELETE",
-      })
-      if (!response.ok) {
-        throw new Error("Erro ao deletar tarefa")
-      }
-      toast.success("Tarefa deletada com sucesso")
-      navigate("/")
-    } catch (error) {
-      console.error(error)
-      toast.error("Erro ao deletar tarefa")
-    }
+  const handleDeleteClick = () => {
+    deleteTaskMutate(undefined, {
+      onSuccess: () => {
+        updateTasksCache((currentTasks) =>
+          currentTasks.filter((t) => t.id !== task.id)
+        )
+        navigate("/")
+        toast.success("Tarefa deletada com sucesso!")
+      },
+      onError: (error) => {
+        console.error("Erro ao deletar tarefa", error)
+        toast.error("Erro ao deletar tarefa")
+      },
+    })
   }
 
   return (
@@ -126,8 +152,16 @@ const TaskDetailsPage = () => {
       <div className="flex w-full items-center justify-between">
         <h1 className="text-xl font-semibold">{task?.title}</h1>
 
-        <Button className="bg-danger" onClick={handleDeleteClick}>
-          <TrashIcon />
+        <Button
+          className="bg-danger"
+          onClick={handleDeleteClick}
+          disabled={isDeleting}
+        >
+          {isDeleting ? (
+            <LoaderIcon className="h-4 w-4 animate-spin" />
+          ) : (
+            <TrashIcon />
+          )}
           Deletar tarefa
         </Button>
       </div>
@@ -145,7 +179,7 @@ const TaskDetailsPage = () => {
                   value.trim() !== "" || "O título não pode estar vazio",
               })}
               errorMessage={errors?.title?.message}
-              disabled={isSubmitting}
+              disabled={isEditing}
             />
           </div>
 
@@ -159,7 +193,7 @@ const TaskDetailsPage = () => {
                   value.trim() !== "" || "O horário não pode estar vazio",
               })}
               errorMessage={errors?.time?.message}
-              disabled={isSubmitting}
+              disabled={isEditing}
             />
           </div>
 
@@ -173,7 +207,7 @@ const TaskDetailsPage = () => {
                   value.trim() !== "" || "A descrição não pode estar vazio",
               })}
               errorMessage={errors?.description?.message}
-              disabled={isSubmitting}
+              disabled={isEditing}
             />
           </div>
         </div>
@@ -184,9 +218,9 @@ const TaskDetailsPage = () => {
             size="large"
             color="primary"
             type="submit"
-            disabled={isSubmitting}
+            disabled={isEditing}
           >
-            {isSubmitting && <LoaderIcon className="h-4 w-4 animate-spin" />}
+            {isEditing && <LoaderIcon className="h-4 w-4 animate-spin" />}
             Salvar
           </Button>
         </div>
