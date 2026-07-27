@@ -1,10 +1,10 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query"
 import PropTypes from "prop-types"
 import { Link } from "react-router-dom"
 import { toast } from "sonner"
 
 import { CheckIcon, DetailsIcon, LoaderIcon, TrashIcon } from "../assets/icons"
 import { useDeleteTask } from "../hooks/data/use-delete-task"
+import { useUpdateTaskStatus } from "../hooks/data/use-update-task"
 import Button from "./Button"
 
 const STATUS_CONFIG = {
@@ -40,31 +40,9 @@ const STATUS_TOAST = {
 }
 
 const TaskItem = ({ task }) => {
-  const queryClient = useQueryClient()
   const { mutate: deleteTask, isPending: isDeleting } = useDeleteTask(task.id)
-
-  const updateTasksCache = (updater) => {
-    queryClient.setQueryData(["tasks"], (currentTasks) =>
-      currentTasks ? updater(currentTasks) : currentTasks
-    )
-  }
-
-  const updateStatus = async (newStatus) => {
-    const response = await fetch(`http://localhost:3000/tasks/${task.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: newStatus }),
-    })
-    if (!response.ok) {
-      throw new Error("Erro ao atualizar tarefa")
-    }
-    return response.json()
-  }
-  const { mutate: updateStatusMutate, isPending: isStatusUpdating } =
-    useMutation({
-      mutationKey: ["updateTaskStatus", task.id],
-      mutationFn: updateStatus,
-    })
+  const { mutate: updateStatus, isPending: isStatusUpdating } =
+    useUpdateTaskStatus(task.id)
 
   const status = STATUS_CONFIG[task.status] ?? STATUS_CONFIG.not_started
 
@@ -81,18 +59,12 @@ const TaskItem = ({ task }) => {
 
   const handleCheckboxClick = () => {
     const newStatus = STATUS_CYCLE[task.status] ?? STATUS_CYCLE.not_started
-    updateStatusMutate(newStatus, {
+    updateStatus(newStatus, {
       onSuccess: (updatedTask) => {
-        updateTasksCache((currentTasks) =>
-          currentTasks.map((t) =>
-            t.id === updatedTask.id ? { ...t, status: updatedTask.status } : t
-          )
-        )
         const { message, type } = STATUS_TOAST[updatedTask.status]
         toast[type](message)
       },
-      onError: (error) => {
-        console.error("Erro ao atualizar tarefa", error)
+      onError: () => {
         toast.error("Erro ao atualizar tarefa")
       },
     })
