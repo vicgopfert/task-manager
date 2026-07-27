@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query"
 import { useState } from "react"
 
 import {
@@ -12,19 +11,10 @@ import AddTaskDialog from "../components/AddTaskDialog"
 import Button from "../components/Button"
 import TaskItem from "../components/TaskItem"
 import TasksSeparator from "../components/TasksSeparator"
+import { useGetTasks } from "../hooks/data/use-get-tasks"
 
 const TasksPage = () => {
-  const fetchTasks = async () => {
-    const response = await fetch("http://localhost:3000/tasks")
-    if (!response.ok) {
-      throw new Error("Erro ao buscar tarefas")
-    }
-    return response.json()
-  }
-  const { data: tasks } = useQuery({
-    queryKey: ["tasks"],
-    queryFn: fetchTasks,
-  })
+  const { data: tasks } = useGetTasks()
 
   const [addTaskDialogIsOpen, setAddTaskDialogIsOpen] = useState(false)
 

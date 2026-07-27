@@ -4,6 +4,7 @@ import { Link } from "react-router-dom"
 import { toast } from "sonner"
 
 import { CheckIcon, DetailsIcon, LoaderIcon, TrashIcon } from "../assets/icons"
+import { useDeleteTask } from "../hooks/data/use-delete-task"
 import Button from "./Button"
 
 const STATUS_CONFIG = {
@@ -40,26 +41,13 @@ const STATUS_TOAST = {
 
 const TaskItem = ({ task }) => {
   const queryClient = useQueryClient()
+  const { mutate: deleteTask, isPending: isDeleting } = useDeleteTask(task.id)
 
   const updateTasksCache = (updater) => {
     queryClient.setQueryData(["tasks"], (currentTasks) =>
       currentTasks ? updater(currentTasks) : currentTasks
     )
   }
-
-  const deleteTask = async () => {
-    const response = await fetch(`http://localhost:3000/tasks/${task.id}`, {
-      method: "DELETE",
-    })
-    if (!response.ok) {
-      throw new Error("Erro ao deletar tarefa")
-    }
-    return response.json()
-  }
-  const { mutate: deleteTaskMutate, isPending: isDeleting } = useMutation({
-    mutationKey: ["deleteTask", task.id],
-    mutationFn: deleteTask,
-  })
 
   const updateStatus = async (newStatus) => {
     const response = await fetch(`http://localhost:3000/tasks/${task.id}`, {
@@ -81,15 +69,11 @@ const TaskItem = ({ task }) => {
   const status = STATUS_CONFIG[task.status] ?? STATUS_CONFIG.not_started
 
   const handleDeleteClick = () => {
-    deleteTaskMutate(undefined, {
+    deleteTask(undefined, {
       onSuccess: () => {
-        updateTasksCache((currentTasks) =>
-          currentTasks.filter((t) => t.id !== task.id)
-        )
         toast.success("Tarefa deletada com sucesso!")
       },
-      onError: (error) => {
-        console.error("Erro ao deletar tarefa", error)
+      onError: () => {
         toast.error("Erro ao deletar tarefa")
       },
     })
