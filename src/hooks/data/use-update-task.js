@@ -1,22 +1,14 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 
+import { api } from "../../lib/axios"
+
 export const useUpdateTask = (taskId) => {
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationKey: ["updateTask", taskId],
     mutationFn: async (task) => {
-      const response = await fetch(`http://localhost:3000/tasks/${taskId}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(task),
-      })
-      if (!response.ok) {
-        throw new Error("Erro ao atualizar tarefa")
-      }
-      const updatedTask = await response.json()
+      const { data: updatedTask } = await api.patch(`/tasks/${taskId}`, task)
       return updatedTask
     },
     onSuccess: (updatedTask) => {
@@ -41,17 +33,9 @@ export const useUpdateTaskStatus = (taskId) => {
   return useMutation({
     mutationKey: ["updateTaskStatus", taskId],
     mutationFn: async (status) => {
-      const response = await fetch(`http://localhost:3000/tasks/${taskId}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ status }),
+      const { data: updatedTask } = await api.patch(`/tasks/${taskId}`, {
+        status,
       })
-      if (!response.ok) {
-        throw new Error("Erro ao atualizar tarefa")
-      }
-      const updatedTask = await response.json()
       return updatedTask
     },
     onSuccess: (updatedTask) => {
