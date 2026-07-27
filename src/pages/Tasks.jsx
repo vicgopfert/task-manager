@@ -1,14 +1,5 @@
-import { useState } from "react"
-
-import {
-  AddIcon,
-  CloudSunIcon,
-  MoonIcon,
-  SunIcon,
-  TrashIcon,
-} from "../assets/icons"
-import AddTaskDialog from "../components/AddTaskDialog"
-import Button from "../components/Button"
+import { CloudSunIcon, MoonIcon, SunIcon } from "../assets/icons"
+import Header from "../components/Header"
 import TaskItem from "../components/TaskItem"
 import TasksSeparator from "../components/TasksSeparator"
 import { useGetTasks } from "../hooks/data/use-get-tasks"
@@ -16,40 +7,13 @@ import { useGetTasks } from "../hooks/data/use-get-tasks"
 const TasksPage = () => {
   const { data: tasks } = useGetTasks()
 
-  const [addTaskDialogIsOpen, setAddTaskDialogIsOpen] = useState(false)
-
   const morningTasks = tasks?.filter((task) => task.time === "morning")
   const afternoonTasks = tasks?.filter((task) => task.time === "afternoon")
   const eveningTasks = tasks?.filter((task) => task.time === "evening")
 
   return (
     <div className="w-full space-y-6 px-8 py-16">
-      <div className="flex w-full justify-between">
-        <div>
-          <span className="text-xs font-semibold text-primary">
-            Minhas Tarefas
-          </span>
-
-          <h2 className="text-xl font-semibold">Minhas Tarefas</h2>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Button color="ghost">
-            Limpar Tarefa
-            <TrashIcon />
-          </Button>
-
-          <Button onClick={() => setAddTaskDialogIsOpen(true)}>
-            Nova Tarefa
-            <AddIcon />
-          </Button>
-
-          <AddTaskDialog
-            isOpen={addTaskDialogIsOpen}
-            handleClose={() => setAddTaskDialogIsOpen(false)}
-          />
-        </div>
-      </div>
+      <Header subtitle="Minhas Tarefas" title="Minhas Tarefas" />
 
       <div className="rounded-xl bg-white p-6">
         <div className="space-y-3">
