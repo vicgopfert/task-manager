@@ -2,6 +2,7 @@ import { Route, Routes } from "react-router-dom"
 import { Toaster } from "sonner"
 
 import Sidebar from "./components/Sidebar"
+import HomePage from "./pages/Home"
 import TaskDetailsPage from "./pages/TaskDetails"
 import TasksPage from "./pages/Tasks"
 
@@ -19,7 +20,8 @@ function App() {
       />
       <Sidebar />
       <Routes>
-        <Route path="/" element={<TasksPage />} />
+        <Route path="/" element={<HomePage />} />
+        <Route path="/tasks" element={<TasksPage />} />
         <Route path="/task/:taskId" element={<TaskDetailsPage />} />
       </Routes>
     </div>
