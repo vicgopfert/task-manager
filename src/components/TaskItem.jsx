@@ -1,30 +1,41 @@
 import PropTypes from "prop-types"
 import { Link } from "react-router-dom"
 import { toast } from "sonner"
+import { tv } from "tailwind-variants"
 
 import { CheckIcon, DetailsIcon, LoaderIcon, TrashIcon } from "../assets/icons"
 import { useDeleteTask } from "../hooks/data/use-delete-task"
 import { useUpdateTaskStatus } from "../hooks/data/use-update-task"
 import Button from "./Button"
 
-const STATUS_CONFIG = {
-  done: {
-    color: "text-primary",
-    iconBg: "bg-primary text-white",
-    icon: <CheckIcon className="pointer-events-none relative z-10 h-4 w-4" />,
+const taskItem = tv({
+  base: "flex items-center justify-between gap-2 rounded-lg bg-current/10 px-4 py-3 text-sm transition",
+  variants: {
+    status: {
+      done: "text-primary",
+      in_progress: "text-process",
+      not_started: "bg-dark-blue/5 text-dark-blue",
+    },
   },
-  in_progress: {
-    color: "text-process",
-    iconBg: "bg-process text-white",
-    icon: (
-      <LoaderIcon className="pointer-events-none relative z-10 h-4 w-4 animate-spin" />
-    ),
+})
+
+const checkbox = tv({
+  base: "relative flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg",
+  variants: {
+    status: {
+      done: "bg-primary text-white",
+      in_progress: "bg-process text-white",
+      not_started: "bg-dark-blue/10",
+    },
   },
-  not_started: {
-    color: "text-dark-blue",
-    iconBg: "bg-dark-blue/10",
-    icon: null,
-  },
+})
+
+const STATUS_ICON = {
+  done: <CheckIcon className="pointer-events-none relative z-10 h-4 w-4" />,
+  in_progress: (
+    <LoaderIcon className="pointer-events-none relative z-10 h-4 w-4 animate-spin" />
+  ),
+  not_started: null,
 }
 
 const STATUS_CYCLE = {
@@ -44,7 +55,7 @@ const TaskItem = ({ task }) => {
   const { mutate: updateStatus, isPending: isStatusUpdating } =
     useUpdateTaskStatus(task.id)
 
-  const status = STATUS_CONFIG[task.status] ?? STATUS_CONFIG.not_started
+  const status = task.status in STATUS_ICON ? task.status : "not_started"
 
   const handleDeleteClick = () => {
     deleteTask(undefined, {
@@ -71,13 +82,9 @@ const TaskItem = ({ task }) => {
   }
 
   return (
-    <div
-      className={`flex items-center justify-between gap-2 rounded-lg bg-current/10 px-4 py-3 text-sm transition ${status.color}`}
-    >
+    <div className={taskItem({ status })}>
       <div className="flex items-center gap-2">
-        <label
-          className={`relative flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg ${status.iconBg}`}
-        >
+        <label className={checkbox({ status })}>
           <input
             type="checkbox"
             checked={task.status === "done"}
@@ -85,7 +92,7 @@ const TaskItem = ({ task }) => {
             disabled={isStatusUpdating}
             className="absolute h-full w-full cursor-pointer opacity-0"
           />
-          {status.icon}
+          {STATUS_ICON[status]}
         </label>
 
         {task.title}
