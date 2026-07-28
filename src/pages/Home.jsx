@@ -1,6 +1,7 @@
 import DashboardCards from "../components/DashboardCards"
 import Header from "../components/Header"
 import TaskItem from "../components/TaskItem"
+import WaterCard from "../components/WaterCard"
 import { useGetTasks } from "../hooks/data/use-get-tasks"
 
 const HomePage = () => {
@@ -14,7 +15,7 @@ const HomePage = () => {
 
       <DashboardCards />
 
-      <div className="grid grid-cols-2">
+      <div className="grid grid-cols-2 gap-6">
         <div className="space-y-6 rounded-xl bg-white p-6">
           <div>
             <h3>Tarefas</h3>
@@ -29,11 +30,8 @@ const HomePage = () => {
             ))}
           </div>
         </div>
-        <div className="flex items-center justify-center space-y-6 rounded-xl bg-white p-6">
-          <p className="text-sm text-gray-500">
-            Cada pequena conquista é uma vitória!
-          </p>
-        </div>
+
+        <WaterCard />
       </div>
     </div>
   )

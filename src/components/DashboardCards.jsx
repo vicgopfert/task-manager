@@ -1,13 +1,24 @@
-import { LoaderIcon, Tasks2Icon, TasksIcon } from "../assets/icons"
+import {
+  GlassWaterIcon,
+  LoaderIcon,
+  Tasks2Icon,
+  TasksIcon,
+} from "../assets/icons"
 import { useGetTasks } from "../hooks/data/use-get-tasks"
+import { useGetWater } from "../hooks/data/use-water"
 import DashboardCard from "./DashboardCard"
+
+const WATER_GOAL = 2500
 
 const DashboardCards = () => {
   const { data: tasks } = useGetTasks()
+  const { data: water } = useGetWater()
 
-  const notStartedTasks = tasks?.filter((task) => task.status === "not_started")
   const inProgressTasks = tasks?.filter((task) => task.status === "in_progress")
   const completedTasks = tasks?.filter((task) => task.status === "done")
+
+  const waterPercentage =
+    water && Math.round((water.consumed / WATER_GOAL) * 100)
 
   return (
     <div className="grid grid-cols-4 gap-9">
@@ -18,11 +29,6 @@ const DashboardCards = () => {
       />
       <DashboardCard
         icon={<LoaderIcon />}
-        info={notStartedTasks?.length}
-        description={"Tarefas não iniciadas"}
-      />
-      <DashboardCard
-        icon={<LoaderIcon />}
         info={inProgressTasks?.length}
         description={"Tarefas em andamento"}
       />
@@ -30,6 +36,11 @@ const DashboardCards = () => {
         icon={<TasksIcon />}
         info={completedTasks?.length}
         description={"Tarefas concluídas"}
+      />
+      <DashboardCard
+        icon={<GlassWaterIcon />}
+        info={waterPercentage !== undefined ? `${waterPercentage}%` : undefined}
+        description={"Água"}
       />
     </div>
   )
