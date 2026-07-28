@@ -17,11 +17,13 @@ export const useUpdateTask = (taskId) => {
       queryClient.setQueryData(taskQueryKeys.getAll(), (currentTasks) =>
         currentTasks
           ? currentTasks.map((task) =>
-              task.id === updatedTask.id ? updatedTask : task
+              task.id === updatedTask.id ? { ...task, ...updatedTask } : task
             )
           : currentTasks
       )
-      queryClient.setQueryData(taskQueryKeys.getById(taskId), updatedTask)
+      queryClient.setQueryData(taskQueryKeys.getById(taskId), (oldTask) =>
+        oldTask ? { ...oldTask, ...updatedTask } : updatedTask
+      )
     },
     onError: (error) => {
       console.error("Erro ao atualizar tarefa", error)
