@@ -25,9 +25,15 @@ const HomePage = () => {
           </div>
 
           <div className="space-y-3">
-            {notStartedTasks?.map((task) => (
-              <TaskItem task={task} key={task.id} />
-            ))}
+            {notStartedTasks?.length === 0 ? (
+              <p className="text-sm text-text-gray">
+                Nenhuma tarefa disponível.
+              </p>
+            ) : (
+              notStartedTasks?.map((task) => (
+                <TaskItem task={task} key={task.id} />
+              ))
+            )}
           </div>
         </div>
 

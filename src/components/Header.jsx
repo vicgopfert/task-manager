@@ -4,9 +4,11 @@ import { useState } from "react"
 import { AddIcon, TrashIcon } from "../assets/icons"
 import AddTaskDialog from "./AddTaskDialog"
 import Button from "./Button"
+import ClearTasksDialog from "./ClearTasksDialog"
 
 const Header = ({ subtitle, title }) => {
   const [addTaskDialogIsOpen, setAddTaskDialogIsOpen] = useState(false)
+  const [clearTasksDialogIsOpen, setClearTasksDialogIsOpen] = useState(false)
 
   return (
     <div className="flex w-full justify-between">
@@ -17,8 +19,8 @@ const Header = ({ subtitle, title }) => {
       </div>
 
       <div className="flex items-center gap-2">
-        <Button color="ghost">
-          Limpar Tarefa
+        <Button color="ghost" onClick={() => setClearTasksDialogIsOpen(true)}>
+          Limpar Tarefas
           <TrashIcon />
         </Button>
 
@@ -30,6 +32,11 @@ const Header = ({ subtitle, title }) => {
         <AddTaskDialog
           isOpen={addTaskDialogIsOpen}
           handleClose={() => setAddTaskDialogIsOpen(false)}
+        />
+
+        <ClearTasksDialog
+          isOpen={clearTasksDialogIsOpen}
+          handleClose={() => setClearTasksDialogIsOpen(false)}
         />
       </div>
     </div>
