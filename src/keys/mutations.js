@@ -4,3 +4,7 @@ export const taskMutationKeys = {
   updateStatus: (taskId) => ["update-task-status", taskId],
   delete: (taskId) => ["delete-task", taskId],
 }
+
+export const waterMutationKeys = {
+  update: () => ["update-water"],
+}

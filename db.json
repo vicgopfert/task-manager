@@ -5,14 +5,14 @@
       "title": "Estudar",
       "description": "Estudar curso de React",
       "time": "morning",
-      "status": "done"
+      "status": "not_started"
     },
     {
       "id": 2,
       "title": "Treinar",
       "description": "Fazer exercícios de musculação",
       "time": "morning",
-      "status": "done"
+      "status": "not_started"
     },
     {
       "id": 3,
@@ -33,7 +33,10 @@
       "title": "Descansar",
       "description": "Assistir série ou filme",
       "time": "evening",
-      "status": "not_started"
+      "status": "done"
     }
-  ]
+  ],
+  "water": {
+    "consumed": 1500
+  }
 }
