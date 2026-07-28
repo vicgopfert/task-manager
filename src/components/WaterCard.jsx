@@ -1,8 +1,7 @@
 import { toast } from "sonner"
-import { tv } from "tailwind-variants"
 
-import { CheckIcon } from "../assets/icons"
 import { useGetWater, useUpdateWater } from "../hooks/data/use-water"
+import WaterItem from "./WaterItem"
 
 const WATER_OPTIONS = [
   { label: "500 ml", value: 500 },
@@ -23,35 +22,18 @@ const formatWater = (ml) => {
   return `${liters} ${liters === 1 ? "litro" : "litros"}`
 }
 
-const waterOption = tv({
-  base: "flex w-full items-center gap-2 rounded-lg px-4 py-3 text-sm font-medium transition disabled:opacity-70",
-  variants: {
-    checked: {
-      true: "bg-primary/15 text-dark-blue",
-      false: "bg-dark-blue/5 text-dark-blue/80",
-    },
-  },
-})
-
-const waterCheckbox = tv({
-  base: "flex h-5 w-5 items-center justify-center rounded-md",
-  variants: {
-    checked: {
-      true: "bg-primary text-white",
-      false: "bg-dark-blue/10",
-    },
-  },
-})
-
 const WaterCard = () => {
   const { data: water } = useGetWater()
   const { mutate: updateWater, isPending: isUpdatingWater } = useUpdateWater()
 
   const consumedWater = water?.consumed ?? 0
 
-  const handleWaterOptionClick = (value) => {
+  const handleCheckboxClick = (value) => {
     const newConsumed = consumedWater >= value ? value - WATER_STEP : value
     updateWater(newConsumed, {
+      onSuccess: () => {
+        toast.success("Água atualizada com sucesso")
+      },
       onError: () => {
         toast.error("Erro ao atualizar água")
       },
@@ -68,23 +50,15 @@ const WaterCard = () => {
       </div>
 
       <div className="space-y-3">
-        {WATER_OPTIONS.map((option) => {
-          const checked = consumedWater >= option.value
-          return (
-            <button
-              key={option.value}
-              type="button"
-              onClick={() => handleWaterOptionClick(option.value)}
-              disabled={isUpdatingWater}
-              className={waterOption({ checked })}
-            >
-              <span className={waterCheckbox({ checked })}>
-                {checked && <CheckIcon className="h-4 w-4" />}
-              </span>
-              {option.label}
-            </button>
-          )
-        })}
+        {WATER_OPTIONS.map((option) => (
+          <WaterItem
+            key={option.value}
+            label={option.label}
+            checked={consumedWater >= option.value}
+            disabled={isUpdatingWater}
+            onClick={() => handleCheckboxClick(option.value)}
+          />
+        ))}
       </div>
 
       <p className="text-right text-sm font-bold text-primary">
